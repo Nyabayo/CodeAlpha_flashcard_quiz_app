@@ -1,6 +1,7 @@
 // screens/quiz_screen.dart
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:flip_card/flip_card.dart';
 import '../providers/flashcard_provider.dart';
 
 class QuizScreen extends StatefulWidget {
@@ -16,7 +17,7 @@ class _QuizScreenState extends State<QuizScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Quiz'),
+        title: Text('Flashcards App'),
       ),
       body: Consumer<FlashcardProvider>(
         builder: (context, flashcardProvider, child) {
@@ -27,6 +28,7 @@ class _QuizScreenState extends State<QuizScreen> {
           }
 
           final flashcard = flashcardProvider.flashcards[_currentIndex];
+          int totalQuestions = flashcardProvider.flashcards.length;
 
           return Padding(
             padding: EdgeInsets.all(16.0),
@@ -35,41 +37,103 @@ class _QuizScreenState extends State<QuizScreen> {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 Text(
-                  flashcard.question,
-                  style: TextStyle(fontSize: 24.0),
+                  'Question ${_currentIndex + 1} of $totalQuestions Completed',
+                  style: TextStyle(fontSize: 18.0),
                   textAlign: TextAlign.center,
                 ),
-                if (_showAnswer)
-                  Padding(
-                    padding: EdgeInsets.symmetric(vertical: 20.0),
-                    child: Text(
-                      flashcard.answer,
-                      style: TextStyle(fontSize: 18.0, color: Colors.grey),
-                      textAlign: TextAlign.center,
-                    ),
-                  ),
-                SizedBox(height: 20),
-                ElevatedButton(
-                  onPressed: () {
-                    setState(() {
-                      _showAnswer = !_showAnswer;
-                    });
-                  },
-                  child: Text(_showAnswer ? 'Hide Answer' : 'Show Answer'),
+                SizedBox(height: 10),
+                LinearProgressIndicator(
+                  value: (_currentIndex + 1) / totalQuestions,
+                  backgroundColor: Colors.grey[200],
+                  color: Colors.pinkAccent,
                 ),
                 SizedBox(height: 20),
-                ElevatedButton(
-                  onPressed: () {
-                    if (_currentIndex < flashcardProvider.flashcards.length - 1) {
-                      setState(() {
-                        _currentIndex++;
-                        _showAnswer = false;
-                      });
-                    } else {
-                      _showResult(context);
-                    }
-                  },
-                  child: Text('Next'),
+                FlipCard(
+                  direction: FlipDirection.HORIZONTAL,
+                  front: Container(
+                    padding: EdgeInsets.all(16.0),
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(8.0),
+                      color: Colors.white,
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black26,
+                          blurRadius: 10.0,
+                          offset: Offset(0, 5),
+                        ),
+                      ],
+                    ),
+                    child: Center(
+                      child: Text(
+                        flashcard.question,
+                        style: TextStyle(fontSize: 24.0),
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
+                  ),
+                  back: Container(
+                    padding: EdgeInsets.all(16.0),
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(8.0),
+                      color: Colors.white,
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black26,
+                          blurRadius: 10.0,
+                          offset: Offset(0, 5),
+                        ),
+                      ],
+                    ),
+                    child: Center(
+                      child: Text(
+                        flashcard.answer,
+                        style: TextStyle(fontSize: 24.0),
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
+                  ),
+                ),
+                SizedBox(height: 20),
+                Text(
+                  'Tap to see Answer',
+                  style: TextStyle(color: Colors.grey, fontSize: 16.0),
+                  textAlign: TextAlign.center,
+                ),
+                SizedBox(height: 20),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    ElevatedButton.icon(
+                      onPressed: () {
+                        if (_currentIndex < flashcardProvider.flashcards.length - 1) {
+                          setState(() {
+                            _currentIndex++;
+                            _showAnswer = false;
+                          });
+                        } else {
+                          _showResult(context);
+                        }
+                      },
+                      icon: Icon(Icons.thumb_up),
+                      label: Text('Correct'),
+                      style: ElevatedButton.styleFrom(backgroundColor: Colors.green),
+                    ),
+                    ElevatedButton.icon(
+                      onPressed: () {
+                        if (_currentIndex < flashcardProvider.flashcards.length - 1) {
+                          setState(() {
+                            _currentIndex++;
+                            _showAnswer = false;
+                          });
+                        } else {
+                          _showResult(context);
+                        }
+                      },
+                      icon: Icon(Icons.thumb_down),
+                      label: Text('Wrong'),
+                      style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+                    ),
+                  ],
                 ),
               ],
             ),
